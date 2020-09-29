@@ -41,6 +41,7 @@ module.exports = {
 
             sails.log.info(`Controller ${FILE_PATH} -- Socket ID ${SOCKET_ID}: ${inputs.username} successfully joined room ${inputs.room}`);
             // Broadcast to everyone in the room that a new follower has joined
+            sails.sockets.broadcast(sails.sockets.getId(this.req), 'personal_notification', `You have joined room ${inputs.room}`);
             sails.sockets.broadcast(inputs.room, 'new_follower_notification', `${inputs.username} has joined room ${inputs.room}`, this.req);
             return exits.success({ status: "success", data: `${inputs.username} has joined room ${inputs.room}`});
         });
