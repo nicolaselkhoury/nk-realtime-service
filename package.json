@@ -5,6 +5,7 @@
   "description": "a Sails application",
   "keywords": [],
   "dependencies": {
+    "jsonwebtoken": "8.5.1",
     "sails": "^1.2.3",
     "grunt": "1.0.4",
     "sails-hook-grunt": "^4.0.0",

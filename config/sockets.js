@@ -1,82 +1,85 @@
-/**
- * WebSocket Server Settings
- * (sails.config.sockets)
- *
- * Use the settings below to configure realtime functionality in your app.
- * (for additional recommended settings, see `config/env/production.js`)
- *
- * For all available options, see:
- * https://sailsjs.com/config/sockets
- */
+	/**
+	 * WebSocket Server Settings
+	 * (sails.config.sockets)
+	 *
+	 * Use the settings below to configure realtime functionality in your app.
+	 * (for additional recommended settings, see `config/env/production.js`)
+	 *
+	 * For all available options, see:
+	 * https://sailsjs.com/config/sockets
+	 */
 
 module.exports.sockets = {
 
-  /***************************************************************************
-  *                                                                          *
-  * `transports`                                                             *
-  *                                                                          *
-  * The protocols or "transports" that socket clients are permitted to       *
-  * use when connecting and communicating with this Sails application.       *
-  *                                                                          *
-  * > Never change this here without also configuring `io.sails.transports`  *
-  * > in your client-side code.  If the client and the server are not using  *
-  * > the same array of transports, sockets will not work properly.          *
-  * >                                                                        *
-  * > For more info, see:                                                    *
-  * > https://sailsjs.com/docs/reference/web-sockets/socket-client           *
-  *                                                                          *
-  ***************************************************************************/
+	transports: [ 'websocket' ],
+	adapter: '@sailshq/socket.io-redis',
+	host: '127.0.0.1',
+	port: 6379,
+	db: 3,
 
-  // transports: [ 'websocket' ],
-
-
-  /***************************************************************************
-  *                                                                          *
-  * `beforeConnect`                                                          *
-  *                                                                          *
-  * This custom beforeConnect function will be run each time BEFORE a new    *
-  * socket is allowed to connect, when the initial socket.io handshake is    *
-  * performed with the server.                                               *
-  *                                                                          *
-  * https://sailsjs.com/config/sockets#?beforeconnect                        *
-  *                                                                          *
-  ***************************************************************************/
-
-  // beforeConnect: function(handshake, proceed) {
-  //
-  //   // `true` allows the socket to connect.
-  //   // (`false` would reject the connection)
-  //   return proceed(undefined, true);
-  //
-  // },
+	/***************************************************************************
+	 *                                                                          *
+	 * `beforeConnect`                                                          *
+	 *                                                                          *
+	 * This custom beforeConnect function will be run each time BEFORE a new    *
+	 * socket is allowed to connect, when the initial socket.io handshake is    *
+	 * performed with the server.                                               *
+	 *                                                                          *
+	 * https://sailsjs.com/config/sockets#?beforeconnect                        *
+	 *                                                                          *
+	 ***************************************************************************/
 
 
-  /***************************************************************************
-  *                                                                          *
-  * `afterDisconnect`                                                        *
-  *                                                                          *
-  * This custom afterDisconnect function will be run each time a socket      *
-  * disconnects                                                              *
-  *                                                                          *
-  ***************************************************************************/
+	beforeConnect: async (handshake, proceed) => {
+		const jwt = require("jsonwebtoken");
+		const FILE_PATH = __filename.split('config')[1];
+        sails.log.info(`File ${FILE_PATH} -- Verifying the JWT token of a new socket connection`);
 
-  // afterDisconnect: function(session, socket, done) {
-  //
-  //   // By default: do nothing.
-  //   // (but always trigger the callback)
-  //   return done();
-  //
-  // },
+		let token = handshake._query.token;
+
+		if(!token) {
+			sails.log.warn(`File ${FILE_PATH} -- There exists no token. Rejecting the connection.`);
+			return proceed({status: "logicalError", message: "Provide a JWT token to authenticate"}, false);
+		}
+		try {
+			let data = jwt.verify(token, sails.config.custom.jwt.secret);
+			sails.log.info(`File ${FILE_PATH} -- Successfully verified the JWT token and extracted the following:`);
+			sails.log.info(`File ${FILE_PATH} -- ${data}`);
+			return proceed(null, true);
+		} catch (error) {
+			sails.log.warn(`File ${FILE_PATH} -- Error while verifying the JWT token:`);
+			sails.log.warn(`File ${FILE_PATH} -- ${error}`);
+			return proceed({status: "logicalError", message: "Invalid JWT Token"}, false);
+		}
+	},
 
 
-  /***************************************************************************
-  *                                                                          *
-  * Whether to expose a 'GET /__getcookie' route that sets an HTTP-only      *
-  * session cookie.                                                          *
-  *                                                                          *
-  ***************************************************************************/
+	/***************************************************************************
+	 *                                                                          *
+	 * `afterDisconnect`                                                        *
+	 *                                                                          *
+	 * This custom afterDisconnect function will be run each time a socket      *
+	 * disconnects                                                              *
+	 *                                                                          *
+	 ***************************************************************************/
 
-  // grant3rdPartyCookie: true,
+	// afterDisconnect: function(session, socket, done) {
+	//
+	//   // By default: do nothing.
+	//   // (but always trigger the callback)
+	//   return done();
+	//
+	// },
+
+
+	/***************************************************************************
+	 *                                                                          *
+	 * Whether to expose a 'GET /__getcookie' route that sets an HTTP-only      *
+	 * session cookie.                                                          *
+	 *                                                                          *
+	 ***************************************************************************/
+
+	// grant3rdPartyCookie: true,
 
 
 };

@@ -4,6 +4,7 @@ module.exports.routes = {
 
 	'POST /follow': {action: 'follow'},
 	'POST /unfollow': {action: 'unfollow'},
+	'POST /message/broadcast': {action: 'message-broadcaster'}
 
 
 };
