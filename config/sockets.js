@@ -13,9 +13,9 @@ module.exports.sockets = {
 
 	transports: [ 'websocket' ],
 	adapter: '@sailshq/socket.io-redis',
-	host: '127.0.0.1',
-	port: 6379,
-	db: 3,
+	host: process.env.SOCKET_REDIS_HOST || '127.0.0.1',
+	port: process.env.SOCKET_REDIS_PORT || 6379,
+	db: process.env.SOCKET_REDIS_DB_NUM || 3,
 
 	/***************************************************************************
 	 *                                                                          *

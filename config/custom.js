@@ -23,7 +23,6 @@ module.exports.custom = {
 	},
 	jwt: {
 		secret: process.env.JWT_SECRET || "potato",
-		accessTokenValidity: parseInt(process.env.JWT_ACCESS_TOKEN_VALIDITY) || 3600,
-		refreshTokenValidity: parseInt(process.env.JWT_REFRESH_TOKEN_VALIDITY) || 86400
+		accessTokenValidity: parseInt(process.env.JWT_ACCESS_TOKEN_VALIDITY) || 3600
 	},
 };
